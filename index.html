@@ -1,0 +1,252 @@
+<html>
+<head>
+    <title>Pavers</title>
+</head>
+<script>
+
+    // 1 pixel = 5mm
+    const PATIO_WIDTH  = 6500;
+    const PATIO_HEIGHT = 5100;
+    const SLAB_WIDTH   = 3100;
+    const SLAB_HEIGHT  = 2600;
+
+    const LEFT_GARDENBED_WIDTH = 300;
+    const LEFT_GARDENBED_HEIGHT = PATIO_HEIGHT;
+
+    const BOTTOM_GARDENBED_WIDTH  = 4800;
+    const BOTTOM_GARDENBED_HEIGHT = 400;
+
+    const GRAVEL_WIDTH = SLAB_WIDTH;
+    const GRAVEL_HEIGHT = 2100;
+
+    const LAWN_WIDTH = 3400;
+    const LAWN_HEIGHT = PATIO_HEIGHT;
+
+
+    var paver_width = 400
+    var paver_heigt = 400
+    var min_paver_padding = 80
+
+    function mmToPixels(mm) {
+        return mm / 5;
+    }
+    function setUp() {
+
+		
+        drawLawn();
+        drawLeftGardenBed();
+        drawLeftGardenBedBottom();
+        drawConcretePatio();
+        drawGravelBed();
+
+        calculateAndDrawPavers();
+        
+        document.getElementById("input_width").value = paver_width;
+        document.getElementById("input_height").value = paver_heigt;
+        document.getElementById("input_spacing").value = min_paver_padding;
+    }
+
+    function redraw() {
+
+        paver_width = parseInt(document.getElementById("input_width").value)
+        paver_heigt = parseInt(document.getElementById("input_height").value)
+        min_paver_padding = parseInt(document.getElementById("input_spacing").value)
+
+
+        if(isNaN(paver_width)|| isNaN(paver_heigt) || isNaN(min_paver_padding)) {
+            alert("Invalid Values");
+            location.reload();
+        }
+
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.clearRect (0, 0, c.width, c.height);
+        
+        setUp()
+
+    }
+    
+    function calculateAndDrawPavers() {
+
+
+        maxNoOfCols = Math.floor(GRAVEL_WIDTH / paver_width);
+        maxNoOfRows = Math.floor(GRAVEL_HEIGHT / paver_heigt);
+        noOfRows    = 0
+        noOfCols    = 0
+        verticlePadding   = 0
+        horizontalPadding = 0
+
+        i=maxNoOfCols-1;
+        for(i; i>0; i-- ){
+
+            noOfPadding            = i + 1;//no of spaces to put between pavers
+            minimumAcceptedPadding = min_paver_padding * noOfPadding;
+            currentPadding         = getVerticalPaddinForPavers(i);
+
+            if(minimumAcceptedPadding < currentPadding){
+                noOfCols = i;
+                verticlePadding = Math.floor(currentPadding / noOfPadding)
+                break;
+            }
+        }
+
+        i=maxNoOfRows-1;
+        for(i; i>0; i-- ){
+
+            noOfPadding            = i + 1;//no of spaces to put between pavers
+            minimumAcceptedPadding = min_paver_padding * noOfPadding;
+            currentPadding         = getHorizontalPaddinForPavers(i);
+
+            if(minimumAcceptedPadding < currentPadding){
+                noOfRows = i;
+                horizontalPadding = Math.floor(currentPadding / noOfPadding)
+                break;
+            }
+        }
+
+        drawPavers(noOfRows,noOfCols,verticlePadding,horizontalPadding)
+
+    }
+
+    function drawPavers(noOfRows,noOfCols,verticlePadding,horizontalPadding) {
+
+
+
+        if(noOfRows ==0 || noOfCols == 0){
+            alert("Could not draw pavers")
+            return;
+        }
+        width  = mmToPixels(paver_width);
+        height = mmToPixels(paver_heigt);
+        x = LEFT_GARDENBED_WIDTH + verticlePadding;
+        y = SLAB_HEIGHT + horizontalPadding;
+
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+
+        for(i=0;i<noOfRows;i++){
+
+            ctx.beginPath();
+            ctx.rect(mmToPixels(x), mmToPixels(y), width, height);
+            ctx.fillStyle = "red";
+            ctx.fill();
+
+            for(q=0;q<noOfCols;q++){
+                ctx.beginPath();
+                ctx.rect(mmToPixels(x), mmToPixels(y), width, height);
+                ctx.fillStyle = "red";
+                ctx.fill();
+                x = x + paver_width + verticlePadding;
+            }
+            x = LEFT_GARDENBED_WIDTH + verticlePadding;
+            y = y + paver_heigt + horizontalPadding;
+        }
+
+
+    }
+
+    /**
+     * Get padding between columns of pavers. this is based on the width of the area
+     * @param noOfPavers
+     * @returns {number|*}
+     */
+    function getVerticalPaddinForPavers(noOfPavers) {
+        return GRAVEL_WIDTH - (noOfPavers * paver_width)
+    }
+    /**
+     * Get padding between rows of pavers. this is based on the height of the area
+     * @param noOfPavers
+     * @returns {number|*}
+     */
+    function getHorizontalPaddinForPavers(noOfPavers) {
+        return GRAVEL_HEIGHT - (noOfPavers * paver_heigt)
+    }
+
+
+    function drawGravelBed() {
+        width  = mmToPixels(GRAVEL_WIDTH);
+        height = mmToPixels(GRAVEL_HEIGHT);
+        x = mmToPixels(LEFT_GARDENBED_WIDTH);
+        y = mmToPixels(SLAB_HEIGHT);
+
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        ctx.fillStyle = "#efe2c9";
+        ctx.fill();
+    }
+
+
+    function drawLeftGardenBedBottom() {
+        width  = mmToPixels(BOTTOM_GARDENBED_WIDTH);
+        height = mmToPixels(BOTTOM_GARDENBED_HEIGHT);
+        x = mmToPixels(300);
+        y = mmToPixels(SLAB_HEIGHT+GRAVEL_HEIGHT);
+
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        ctx.fillStyle = "#af802f";
+        ctx.fill();
+    }
+    function drawLeftGardenBed() {
+        width  = mmToPixels(LEFT_GARDENBED_WIDTH);
+        height = mmToPixels(LEFT_GARDENBED_HEIGHT);
+        x = 0;
+        y = 0;
+
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        ctx.fillStyle = "#af802f";
+        ctx.fill();
+    }
+    function drawConcretePatio() {
+        width  = mmToPixels(SLAB_WIDTH);
+        height = mmToPixels(SLAB_HEIGHT);
+
+        x = mmToPixels(LEFT_GARDENBED_WIDTH)
+        y = 0;
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+
+
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        ctx.fillStyle = "#828da0";
+        ctx.fill();
+    }
+    function drawLawn() {
+        width  = mmToPixels(LAWN_WIDTH);
+        height = mmToPixels(LAWN_HEIGHT);
+
+        x = mmToPixels(LEFT_GARDENBED_WIDTH+SLAB_WIDTH)
+        y = 0;
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+
+
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        ctx.fillStyle = "#3ebc3a";
+        ctx.fill();
+    }
+</script>
+
+<body onload="setUp()">
+
+<!--<h4 id="demo">JS Pavers</h4>-->
+Width: <input id="input_width" />
+Height: <input id="input_height" />
+Minimum Spacing <input id="input_spacing" />
+<button onclick="redraw()" type="button">Redraw</button>
+<canvas id="myCanvas" width="1300" height="1020" style="border:1px solid #000000;">
+
+
+
+
+</body>
+</html>
